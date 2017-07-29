@@ -1,6 +1,5 @@
 /data/runtime
 /data/upload
-index.php
 /simplewind/Core/Library/Vendor/phpqrcode/cache
 /.idea/workspace.xml
 /.idea/libraries
