@@ -2,183 +2,162 @@
 namespace Admin\Controller;
 use Common\Controller\AdminbaseController;
 class ArchiveTypeController extends AdminbaseController{
-	protected $users_model,$role_model;
-	
-	function _initialize() {
-		parent::_initialize();
-		$this->users_model = D("Common/Users");
-		$this->role_model = D("Common/Role");
-	}
 	function index(){
-		$count=$this->users_model->where(array("user_type"=>1))->count();
-		$page = $this->page($count, 20);
-		$users = $this->users_model
-		->where(array("user_type"=>1))
-		->order("create_time DESC")
-		->limit($page->firstRow . ',' . $page->listRows)
-		->select();
-		
-		$roles_src=$this->role_model->select();
-		$roles=array();
-		foreach ($roles_src as $r){
-			$roleid=$r['id'];
-			$roles["$roleid"]=$r;
-		}
-		$this->assign("page", $page->show('Admin'));
-		$this->assign("roles",$roles);
-		$this->assign("users",$users);
-		$this->display();
+        $result = D('ArchiveTypeView')->select();
+        import("Tree");
+        $tree = new \Tree();
+        $tree->icon = array('&nbsp;&nbsp;&nbsp;│ ', '&nbsp;&nbsp;&nbsp;├─ ', '&nbsp;&nbsp;&nbsp;└─ ');
+        $tree->nbsp = '&nbsp;&nbsp;&nbsp;';
+        
+        $typelist=array();
+        foreach ($result as $m){
+        	$typelist[$m['id']]=$m;
+        	 
+        }
+        foreach ($result as $n=> $r) {
+        	
+        	$result[$n]['level'] = $this->_get_level($r['id'], $typelist);
+        	$result[$n]['parentid_node'] = ($r['parentid']) ? ' class="child-of-node-' . $r['parentid'] . '"' : '';
+        	
+            $result[$n]['str_manage'] = '<a href="' . U("ArchiveType/add", array("parentid" => $r['id'])) . '">添加子菜单</a> | <a href="' . U("ArchiveType/edit", array("id" => $r['id'])) . '">修改</a> | <a class="J_ajax_del" href="' . U("ArchiveType/delete", array("id" => $r['id']) ). '">删除</a> ';
+            $result[$n]['status'] = $r['status'] ? "显示" : "隐藏";
+            $result[$n]['role_name'] = $r['role_name'] ? $r['role_name']: "未设定";
+          
+        }
+
+        $tree->init($result);
+        $str = "<tr id='node-\$id' \$parentid_node>
+                    <td style='padding-left:20px;'></td>
+					<td>\$id</td>
+					<td>\$type_sn</td>
+        			<td>\$spacer\$name</td>
+					<td>\$content</td>
+					<td>\$role_name</td>
+				    <td>\$status</td>
+					<td>\$str_manage</td>
+				</tr>";
+        $categorys = $tree->get_tree(0, $str);
+        $this->assign("categorys", $categorys);
+        $this->display();
 	}
 	
 	
-	function add(){
-		$roles=$this->role_model->where("status=1")->order("id desc")->select();
-		$this->assign("roles",$roles);
-		$this->display();
-	}
+	/**
+	 * 获取类型深度
+	 * @param $id
+	 * @param $array
+	 * @param $i
+	 */
+	protected function _get_level($id, $array = array(), $i = 0) {
 	
-	function add_post(){
-		if(IS_POST){
-			if(!empty($_POST['role_id']) && is_array($_POST['role_id'])){
-				$role_ids=$_POST['role_id'];
-				unset($_POST['role_id']);
-				if ($this->users_model->create()) {
-					$result=$this->users_model->add();
-					if ($result!==false) {
-						$role_user_model=M("RoleUser");
-						foreach ($role_ids as $role_id){
-							$role_user_model->add(array("role_id"=>$role_id,"user_id"=>$result));
-						}
-						$this->success("添加成功！", U("user/index"));
-					} else {
-						$this->error("添加失败！");
-					}
-				} else {
-					$this->error($this->users_model->getError());
-				}
-			}else{
-				$this->error("请为此用户指定角色！");
-			}
-			
-		}
+	    if ($array[$id]['parentid']==0 || empty($array[$array[$id]['parentid']]) || $array[$id]['parentid']==$id){
+	        return  $i;
+	    }else{
+	        $i++;
+	        return $this->_get_level($array[$id]['parentid'],$array,$i);
+	    }
+	
 	}
 	
 	
-	function edit(){
-		$id= intval(I("get.id"));
-		$roles=$this->role_model->where("status=1")->order("id desc")->select();
-		$this->assign("roles",$roles);
-		$role_user_model=M("RoleUser");
-		$role_ids=$role_user_model->where(array("user_id"=>$id))->getField("role_id",true);
-		$this->assign("role_ids",$role_ids);
-			
-		$user=$this->users_model->where(array("id"=>$id))->find();
-		$this->assign($user);
-		$this->display();
+	/**
+	 *  添加
+	 */
+	public function add() {
+	    import("Tree");
+	    $tree = new \Tree();
+	    $parentid = intval(I("get.parentid"));
+	    $result = D('ArchiveTypeView')->select();
+	    foreach ($result as $r) {
+	        $r['selected'] = $r['id'] == $parentid ? 'selected' : '';
+	        $array[] = $r;
+	    }
+	    $str = "<option value='\$id' \$selected>\$spacer \$name</option>";
+	    $tree->init($array);
+	    $select_categorys = $tree->get_tree(0, $str);
+	    $this->assign("select_categorys", $select_categorys);
+	    
+	    $role_list=M('Role')->where('id>1')->select();
+	    $this->assign("role_list", $role_list);
+	    $this->display();
 	}
 	
-	function edit_post(){
-		if (IS_POST) {
-			if(!empty($_POST['role_id']) && is_array($_POST['role_id'])){
-				if(empty($_POST['user_pass'])){
-					unset($_POST['user_pass']);
-				}
-				$role_ids=$_POST['role_id'];
-				unset($_POST['role_id']);
-				if ($this->users_model->create()) {
-					$result=$this->users_model->save();
-					if ($result!==false) {
-						$uid=intval($_POST['id']);
-						$role_user_model=M("RoleUser");
-						$role_user_model->where(array("user_id"=>$uid))->delete();
-						foreach ($role_ids as $role_id){
-							$role_user_model->add(array("role_id"=>$role_id,"user_id"=>$uid));
-						}
-						$this->success("保存成功！");
-					} else {
-						$this->error("保存失败！");
-					}
-				} else {
-					$this->error($this->users_model->getError());
-				}
-			}else{
-				$this->error("请为此用户指定角色！");
-			}
-			
-		}
+	/**
+	 *  添加
+	 */
+	public function add_post() {
+	    if (IS_POST) {
+	        $type_model=M('ArchiveType');
+	        if ($type_model->create()) {
+	            $type_model->create_time=time();
+	            if ($type_model->add()!==false) {
+	               
+	                $this->success("添加成功！", U('ArchiveType/index'));
+	            } else {
+	                $this->error("添加失败！");
+	            }
+	        } else {
+	            $this->error($type_model->getError());
+	        }
+	    }
 	}
 	
 	/**
 	 *  删除
 	 */
-	function delete(){
-		$id = intval(I("get.id"));
-		if($id==1){
-			$this->error("最高管理员不能删除！");
-		}
-		
-		if ($this->users_model->where("id=$id")->delete()!==false) {
-			M("RoleUser")->where(array("user_id"=>$id))->delete();
-			$this->success("删除成功！");
-		} else {
-			$this->error("删除失败！");
-		}
+	public function delete() {
+	    $id = intval(I("get.id"));
+	    $count = M('ArchiveType')->where(array("parentid" => $id))->count();
+	    if ($count > 0) {
+	        $this->error("该菜单下还有子菜单，无法删除！");
+	    }
+	    if (M('ArchiveType')->delete($id)!==false) {
+	        $this->success("删除菜单成功！");
+	    } else {
+	        $this->error("删除失败！");
+	    }
 	}
 	
-	
-	function userinfo(){
-		$id=get_current_admin_id();
-		$user=$this->users_model->where(array("id"=>$id))->find();
-		$this->assign($user);
-		$this->display();
+	/**
+	 *  编辑
+	 */
+	public function edit() {
+	    import("Tree");
+	    $tree = new \Tree();
+	    $id = intval(I("get.id"));
+	    $rs = D('ArchiveTypeView')->where(array("id" => $id))->find();
+	    $result = D('ArchiveTypeView')->select();
+	    foreach ($result as $r) {
+	        $r['selected'] = $r['id'] == $rs['parentid'] ? 'selected' : '';
+	        $array[] = $r;
+	    }
+	    $str = "<option value='\$id' \$selected>\$spacer \$name</option>";
+	    $tree->init($array);
+	    $select_categorys = $tree->get_tree(0, $str);
+	    $this->assign("data", $rs);
+	    $this->assign("select_categorys", $select_categorys);
+	    $role_list=M('Role')->where('id>1')->select();
+	    $this->assign("role_list", $role_list);
+	    $this->display();
 	}
 	
-	function userinfo_post(){
-		if (IS_POST) {
-			$_POST['id']=get_current_admin_id();
-			$create_result=$this->users_model
-			->field("user_login,user_email,last_login_ip,last_login_time,create_time,user_activation_key,user_status,role_id,score,user_type",true)//排除相关字段
-			->create();
-			if ($create_result) {
-				if ($this->users_model->save()!==false) {
-					$this->success("保存成功！");
-				} else {
-					$this->error("保存失败！");
-				}
-			} else {
-				$this->error($this->users_model->getError());
-			}
-		}
+	/**
+	 *  编辑
+	 */
+	public function edit_post() {
+	    if (IS_POST) {
+	        $type_model=M('ArchiveType');
+	        if ($type_model->create()) {
+	            if ($type_model->save() !== false) {
+	               
+	                $this->success("更新成功！");
+	            } else {
+	                $this->error("更新失败！");
+	            }
+	        } else {
+	            $this->error($type_model->getError());
+	        }
+	    }
 	}
-	
-	    function ban(){
-        $id=intval($_GET['id']);
-    	if ($id) {
-    		$rst = $this->users_model->where(array("id"=>$id,"user_type"=>1))->setField('user_status','0');
-    		if ($rst) {
-    			$this->success("管理员停用成功！", U("user/index"));
-    		} else {
-    			$this->error('管理员停用失败！');
-    		}
-    	} else {
-    		$this->error('数据传入失败！');
-    	}
-    }
-    
-    function cancelban(){
-    	$id=intval($_GET['id']);
-    	if ($id) {
-    		$rst = $this->users_model->where(array("id"=>$id,"user_type"=>1))->setField('user_status','1');
-    		if ($rst) {
-    			$this->success("管理员启用成功！", U("user/index"));
-    		} else {
-    			$this->error('管理员启用失败！');
-    		}
-    	} else {
-    		$this->error('数据传入失败！');
-    	}
-    }
-	
-	
 	
 }

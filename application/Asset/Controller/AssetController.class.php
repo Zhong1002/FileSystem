@@ -28,7 +28,6 @@ class AssetController extends AdminbaseController {
             		'savePath' => '',
             		'maxSize' => 11048576,
             		'saveName'   =>    array('uniqid',''),
-            		'exts'       =>    array('jpg', 'gif', 'png', 'jpeg',"txt",'zip'),
             		'autoSub'    =>    false,
             );
 			$upload = new \Think\Upload($config);// 
