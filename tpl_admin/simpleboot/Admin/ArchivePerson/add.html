@@ -1,6 +1,6 @@
 <admintpl file="header"/>
 <style type="text/css">
-.col-auto { overflow: auto; _zoom: 1;_float: left;}
+.col-auto {width: 100%; _zoom: 1;_float: left;}
 .col-right { float: right; width: 210px; overflow: hidden; margin-left: 6px; }
 .table th, .table td {vertical-align: middle;}
 .picList li{margin-bottom: 5px;}
@@ -13,13 +13,14 @@
      <li class="active"><a href="{:U('ArchivePerson/add')}">添加档案</a></li>
   </ul>
   <form name="myform" id="myform" action="{:u('ArchivePerson/add_post')}" method="post" class="form-horizontal J_ajaxForms" enctype="multipart/form-data">
+  
   <div class="col-auto">
     <div class="table_full">
       <table class="table table-bordered">
             <tr>
               <th width="80">档案类型</th>
               <td>
-				<select name="type_id" class="normal_select">
+				<select name="archive[type_id]" class="normal_select">
 								{$select_categorys}
 				</select>
               </td>
@@ -27,22 +28,37 @@
             <tr>
               <th width="80">档案名称</th>
               <td>
-              	<input type="text" style="width:400px;" name="post[post_title]" id="title"  required value="" style="color:" class="input input_hd J_title_color" placeholder="请输入标题" onkeyup="strlen_verify(this, 'title_len', 160)" />
+              	<input type="text" style="width:400px;" name="archive[name]" id="title"  required value="" style="color:" class="input input_hd J_title_color" placeholder="请输入标题" onkeyup="strlen_verify(this, 'title_len', 160)" />
               	<span class="must_red">*</span>
               </td>
             </tr>
             <tr>
               <th width="80">档案日期</th>
-              <td><input type="text" name="post[post_modified]" id="updatetime" value="{:date('Y-m-d',time())}" size="21" class="input length_3 J_date" style="width: 160px;"></td>
+              <td><input type="text" name="archive[date_time]" id="updatetime" value="{:date('Y-m-d',time())}" size="21" class="input length_3 J_date" style="width: 160px;"></td>
          </tr>
-            <tr>
-              <th width="80">档案文件 </th>
+         <!--  <tr>
+              <th width="80">档案文件</th>
               <td>
-				<fieldset class="blue pad-10">
-		        <legend>文件列表</legend>
-		        <ul id="photos" class="picList unstyled"></ul>
-				</fieldset>
-				<a href="javascript:;" style="margin: 5px 0;" onclick="javascript:flashupload('albums_images', '文件上传','photos',change_images,'10,gif|jpg|jpeg|png|bmp,0','','','')" class="btn">选择文件 </a>
+              <table class="table table-bordered" id="file_table">
+            <tr>
+              <th width="80">编号</th>
+              <th width="80">文件名</th>
+              <th width="80">大小</th>
+              <th width="80">操作</th>
+            </tr>
+            </table>
+              </td>
+         </tr> -->
+            <tr>
+              <th width="80">上传档案文件 </th>
+              <td>
+              <div id="i_select_files">
+</div>
+
+<div id="i_stream_files_queue">
+</div>
+
+				
 			  </td>
             </tr>
                         
@@ -52,12 +68,14 @@
   </div>
   <div class="form-actions">
         <button class="btn btn-primary btn_submit J_ajax_submit_btn"type="submit">提交</button>
-        <a class="btn" href="{:U('AdminPost/index')}">返回</a>
+        <a class="btn" href="{:U('ArchivePerson/index')}">返回</a>
   </div>
  </form>
 </div>
 <script type="text/javascript" src="__ROOT__/statics/js/common.js"></script>
 <script type="text/javascript" src="__ROOT__/statics/js/content_addtop.js"></script>
+<script type="text/javascript" src="__ROOT__/statics/stream/js/stream-v1.js"></script>
+<link href="__ROOT__/statics/stream/css/stream-v1.css" rel="stylesheet" type="text/css">
 <script type="text/javascript"> 
 $(function () {
 	//setInterval(function(){public_lock_renewal();}, 10000);
@@ -82,17 +100,7 @@ $(function () {
 	});
 	/////---------------------
 	 Wind.use('validate', 'ajaxForm', 'artDialog', function () {
-			//javascript
-	        
-	            //编辑器
-	            editorcontent = new baidu.editor.ui.Editor();
-	            editorcontent.render( 'content' );
-	            try{editorcontent.sync();}catch(err){};
-	            //增加编辑器验证规则
-	            jQuery.validator.addMethod('editorcontent',function(){
-	                try{editorcontent.sync();}catch(err){};
-	                return editorcontent.hasContents();
-	            });
+			//javascrip
 	            var form = $('form.J_ajaxForms');
 	        //ie处理placeholder提交问题
 	        if ($.browser.msie) {
@@ -177,7 +185,7 @@ $(function () {
 											},{
 												name: '返回列表页',
 												callback:function(){
-													location='{:U('AdminPost/index')}';
+													location='{:U('ArchivePerson/index')}';
 													return true;
 												}
 											}
@@ -193,6 +201,40 @@ $(function () {
 	        });
 	    });
 	////-------------------------
+	 /**
+	     * 配置文件（如果没有默认字样，说明默认值就是注释下的值）
+	     * 但是，on*（onSelect， onMaxSizeExceed...）等函数的默认行为
+	     * 是在ID为i_stream_message_container的页面元素中写日志
+	     */
+	    var config = {
+	        formed: true, /** 强制form表单的方式传输(此种方式不支持断点续传) */
+	        browseFileId: "i_select_files", /** 选择文件的ID, 默认: i_select_files */
+	        browseFileBtn: "<div>请选择文件</div>", /** 显示选择文件的样式, 默认: `<div>请选择文件</div>` */
+	        dragAndDropArea: "i_select_files", /** 拖拽上传区域，Id（字符类型"i_select_files"）或者DOM对象, 默认: `i_select_files` */
+	        dragAndDropTips: "<span>把文件(文件夹)拖拽到这里</span>", /** 拖拽提示, 默认: `<span>把文件(文件夹)拖拽到这里</span>` */
+	        filesQueueId: "i_stream_files_queue", /** 文件上传容器的ID, 默认: i_stream_files_queue */
+	        filesQueueHeight: 200, /** 文件上传容器的高度（px）, 默认: 450 */
+	        multipleFiles: true,
+	        swfURL : "__ROOT__/statics/stream/swf/FlashUploader.swf", /** SWF文件的位置 */
+	        tokenURL : "{:U('ArchiveFile/tk')}", /** 根据文件名、大小等信息获取Token的URI（用于生成断点续传、跨域的令牌） */
+	        frmUploadURL : "{:U('ArchiveFile/upload')}", /** Flash上传的URI */
+	        maxSize: 2 * 1024 * 1024 * 1024, /** 2G */
+	        onComplete : function(file) {
+	        	console.log(file);
+	        	  var msg=JSON.parse(file.msg);
+	        	  console.log(msg);
+	        	 	
+	        	 	var urlhtml = "<input type='hidden' name='files_url[]' value='"+msg.message+"' />";
+	        	 	var namehtml = "<input type='hidden' name='files_name[]' value='"+file.name+"' />";
+	        	 	var sizehtml = "<input type='hidden' name='files_size[]' value='"+file.size+"' />";
+	        	 	
+	        	 	$("#myform").append(urlhtml);
+	        	 	$("#myform").append(namehtml);
+	        	 	$("#myform").append(sizehtml);
+	        },
+	        messagerId: "i_stream_message_container" /** 消息显示容器的ID, 默认: i_stream_message_container */
+	    };
+	    var _t = new Stream(config);
 });
 </script>
 </body>

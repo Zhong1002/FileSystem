@@ -4,7 +4,7 @@
 	<div class="wrap J_check_wrap">
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="javascript:;">所有档案</a></li>
-			<li><a href="{:U('ArchivePerson/add')}">添加档案</a></li>
+			<li><a href="{:U('ArchivePerson/add')}" target="_self">添加档案</a></li>
 		</ul>
 		<form class="well form-search" method="post" action="{:U('ArchivePerson/index')}">
 			<div class="search_type cc mb10">
@@ -51,8 +51,8 @@
 					<td>{$status[$vo['status']]}</td>
 					<td>
 						<eq name="vo.status" value="1">
-						<a href="{:U('AdminPost/edit',array('term'=>empty($term['term_id'])?'':$term['term_id'],'id'=>$vo['id']))}">修改</a> | 
-						<a href="{:U('AdminPost/delete',array('term'=>empty($term['term_id'])?'':$term['term_id'],'tid'=>$vo['tid']))}" class="J_ajax_del">删除</a></td>
+						<a href="{:U('ArchivePerson/edit',array('id'=>$vo['archive_id']))}">修改</a> | 
+						<a href="{:U('ArchivePerson/delete',array('id'=>$vo['archive_id']))}" class="J_ajax_del">删除</a></td>
 						<else/>
 						上传后的档案不能再修改
 						</eq>
