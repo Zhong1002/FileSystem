@@ -28,7 +28,7 @@ class FileManager{
 		}
 		
 		$res=rename($file_path,$save_path.$this->get_file_name($file_path));
-		return '/'.$save_path.$this->get_file_name($file_path);
+		return $save_path.$this->get_file_name($file_path);
 	}
 	
 	public function get_type_address($type_id, &$str_address){
@@ -42,5 +42,39 @@ class FileManager{
 	private function get_file_name($file_path){
 		$arr=explode('/', $file_path);
 		return $arr[count($arr)-1];
+	}
+	
+	public function delete($archive){
+		$type_address='';
+		$this->get_type_address($archive['type_id'],$type_address);
+		$save_path=$this->root.$type_address.$archive['archive_id'].'/';
+		
+		$this->del_dir($save_path);
+	}
+	
+	public function delete_file($file){
+		unlink($file['address']);
+	}
+	
+	private function del_dir($dir){
+		//先删除目录下的文件：
+		$dh=opendir($dir);
+		while (false!==($file=readdir($dh))) {
+			if($file!="." && $file!="..") {
+				$fullpath=$dir."/".$file;
+				if(!is_dir($fullpath)) {
+					unlink($fullpath);
+				} else {
+					$this->del_dir($fullpath);
+				}
+			}
+		}
+		closedir($dh);
+		//删除当前文件夹：
+		if(rmdir($dir)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

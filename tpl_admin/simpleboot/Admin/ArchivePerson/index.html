@@ -46,11 +46,12 @@
 					<td>{$vo.archive_id}</td>
 					<td>{$vo.archive_sn}</td>
 					<td>{$vo.type_name}</td>
-					<td><a href="{:U('portal/article/index',array('id'=>$vo['tid']))}"> <span>{$vo.name}</span></a></td>
+					<td><a href="{:U('ArchivePerson/detail',array('id'=>$vo['archive_id']))}"> <span>{$vo.name}</span></a></td>
 					<td>{$vo.date_time}</td>
 					<td>{$status[$vo['status']]}</td>
 					<td>
 						<eq name="vo.status" value="1">
+						<a href="{:U('ArchivePerson/up',array('id'=>$vo['archive_id']))}" class="J_ajax_dialog_btn" data-msg="确定上传吗?上传后档案无法修改">上传院档案</a> |
 						<a href="{:U('ArchivePerson/edit',array('id'=>$vo['archive_id']))}">修改</a> | 
 						<a href="{:U('ArchivePerson/delete',array('id'=>$vo['archive_id']))}" class="J_ajax_del">删除</a></td>
 						<else/>

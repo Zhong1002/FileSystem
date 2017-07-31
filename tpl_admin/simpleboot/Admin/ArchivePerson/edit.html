@@ -1,6 +1,6 @@
 <admintpl file="header"/>
 <style type="text/css">
-.col-auto { overflow: auto; _zoom: 1;_float: left;}
+.col-auto {width: 100%; _zoom: 1;_float: left;}
 .col-right { float: right; width: 210px; overflow: hidden; margin-left: 6px; }
 .table th, .table td {vertical-align: middle;}
 .picList li{margin-bottom: 5px;}
@@ -9,149 +9,66 @@
 <body class="J_scroll_fixed">
 <div class="wrap J_check_wrap">
   <ul class="nav nav-tabs">
-     <li><a href="{:U('AdminPost/index')}">所有文章</a></li>
-     <li><a href="{:U('AdminPost/add',array('term'=>empty($term['term_id'])?'':$term['term_id']))}"  target="_self">添加文章</a></li>
-     <li class="active"><a href="#">文章编辑</a></li>
+     <li><a href="{:U('ArchivePerson/index')}">所有档案</a></li>
+     <li class="active"><a href="">编辑档案</a></li>
   </ul>
-  <form name="myform" id="myform" action="{:u('AdminPost/edit_post')}" method="post" class="form-horizontal J_ajaxForms" enctype="multipart/form-data">
-  <div class="col-right">
-    <div class="table_full">
-      <table class="table table-bordered">
-         <tr>
-          <td><b>缩略图</b></td>
-        </tr>
-        <tr>
-          <td>
-          	<div  style="text-align: center;"><input type='hidden' name='smeta[thumb]' id='thumb' value="{$smeta.thumb|default=''}">
-			<a href='javascript:void(0);' onclick="flashupload('thumb_images', '附件上传','thumb',thumb_images,'1,jpg|jpeg|gif|png|bmp,1,,,1','','','');return false;">
-			
-			<if condition="empty($smeta['thumb'])">
-				<img src="__ROOT__/statics/images/icon/upload-pic.png" id='thumb_preview' width='135' height='113' style='cursor:hand' />
-			<else/>
-				<img src="{:sp_get_asset_upload_path($smeta['thumb'])}" id='thumb_preview' width='135' height='113' style='cursor:hand' />
-			</if>
-			
-			</a>
-			<!-- <input type="button" class="btn" onclick="crop_cut_thumb($('#thumb').val());return false;" value="裁减图片">  -->
-            <input type="button"  class="btn" onclick="$('#thumb_preview').attr('src','__ROOT__/statics/images/icon/upload-pic.png');$('#thumb').val('');return false;" value="取消图片">
-            </div>
-			</td>
-        </tr>
-        <tr>
-          <td><b>发布时间</b></td>
-        </tr>
-        <tr>
-          <td><input type="text" name="post[post_modified]" id="updatetime" value="{$post.post_modified}" size="21" class="input-small J_datetime" style="width:160px;"></td>
-        </tr>
-        <tr>
-          <td><b>评论</b></td>
-        </tr>
-        <tr>
-          <td>
-          	<label class="ib" style="width:88px"><a href="javascript:open_iframe_dialog('{:u('comment/commentadmin/index',array('post_id'=>$post['id']))}','评论列表')">查看评论</a></label>
-          </td>
-        </tr>
-        <tr>
-          <td><b>状态</b></td>
-        </tr>
-        <tr>
-          <td>
-          	<span class="switch_list cc">
-              <php>
-          		$status_yes=$post['post_status']==1?"checked":"";
-          		$status_no=$post['post_status']==0?"checked":"";
-          		$istop_yes=$post['istop']==1?"checked":"";
-          		$istop_no=$post['istop']==0?"checked":"";
-          		$recommended_yes=$post['recommended']==1?"checked":"";
-          		$recommended_no=$post['recommended']==0?"checked":"";
-          	</php>
-			<label class="radio"><input type="radio" name="post[post_status]" value="1" {$status_yes}><span>审核通过</span></label>
-			<label class="radio"><input type="radio" name="post[post_status]" value="0" {$status_no}><span>未审核</span></label>
-		 	</span>
-		 </td>
-        </tr>
-        <tr>
-          <td>
-          	<span class="switch_list cc">
-			<label class="radio"><input type="radio" name="post[istop]" value="1" {$istop_yes}><span>置顶</span></label>
-			<label class="radio"><input type="radio" name="post[istop]" value="0" {$istop_no}><span>未置顶</span></label>
-		 	</span>
-		 </td>
-        </tr>
-        <tr>
-          <td>
-          	<span class="switch_list cc">
-			<label class="radio"><input type="radio" name="post[recommended]" value="1" {$recommended_yes}><span>推荐</span></label>
-			<label class="radio"><input type="radio" name="post[recommended]" value="0" {$recommended_no}><span>未推荐</span></label>
-		 	</span>
-		 </td>
-        </tr>
-      </table>
-    </div>
-  </div>
+  <form name="myform" id="myform" action="{:u('ArchivePerson/edit_post')}" method="post" class="form-horizontal J_ajaxForms" enctype="multipart/form-data">
+  
   <div class="col-auto">
     <div class="table_full">
       <table class="table table-bordered">
             <tr>
-              <th width="80">栏目</th>
+              <th width="80">档案类型</th>
               <td>
-				<select multiple="multiple" style="max-height: 100px;" name="term[]">
-					{$taxonomys}
+				<select name="archive[type_id]" class="normal_select">
+								{$select_categorys}
 				</select>
-				<div>
-					windows：按住 Ctrl 按钮来选择多个选项,Mac：按住 command 按钮来选择多个选项
-				</div>
               </td>
             </tr>
             <tr>
-              <th width="80">标题 </th>
+              <th width="80">档案名称</th>
               <td>
-              	<input type="hidden" name="post[id]" value="{$post.id}">
-              	<input type="text" style="width:400px;" name="post[post_title]" id="title" required value="{$post.post_title}" style="color:" class="input input_hd J_title_color" placeholder="请输入标题" onkeyup="strlen_verify(this, 'title_len', 160)" />
+              	<input type="text" style="width:400px;" name="archive[name]" id="title" value="{$data.name}" required value="" style="color:" class="input input_hd J_title_color" placeholder="请输入标题" onkeyup="strlen_verify(this, 'title_len', 160)" />
               	<span class="must_red">*</span>
               </td>
             </tr>
             <tr>
-              <th width="80">关键词</th>
-              <td><input type='text' name='post[post_keywords]' id='keywords' style='width:400px' value="{$post['post_keywords']}"  class='input' placeholder='请输入关键字'> 多关键词之间用空格或者英文逗号隔开</td>
-            </tr>
-            
-            <tr>
-              <th width="80">文章来源</th>
-              <td><input type='text' name='post[post_source]' id='source' value="{$post['post_source']}" style='width:400px'   class='input' placeholder='请输入文章来源'></td>
-            </tr>
-            <tr>
-              <th width="80">摘要 </th>
-              <td><textarea name='post[post_excerpt]' id='description' required style='width:98%;height:50px;'  placeholder='请填写摘要'>{$post.post_excerpt}</textarea><span class="must_red">*</span></td>
-            </tr>
-            <tr>
-              <th width="80">内容</th>
-              <td><div id='content_tip'></div>
-              	<script type="text/plain" id="content" name="post[post_content]">{$post.post_content}</script>
-                <script type="text/javascript">
-                //编辑器路径定义
-                var editorURL = GV.DIMAUB;
-                </script>
-                <script type="text/javascript"  src="__ROOT__/statics/js/ueditor/ueditor.config.js"></script>
-                <script type="text/javascript"  src="__ROOT__/statics/js/ueditor/ueditor.all.min.js"></script>
-				</td>
-            </tr>
-            <tr>
-              <th width="80">相册图集 </th>
+              <th width="80">档案日期</th>
+              <td><input type="text" name="archive[date_time]" id="updatetime" value="{:date('Y-m-d',strtotime($data['date_time']))}" size="21" class="input length_3 J_date" style="width: 160px;"></td>
+         </tr>
+           <tr>
+              <th width="80">档案文件</th>
               <td>
-				<fieldset class="blue pad-10">
-		        <legend>图片列表</legend>
-		        <ul id="photos" class="picList unstyled">
-			        <foreach name="smeta['photo']" item="vo">
-				        <li id="savedimage{$key}">
-				        	<input type="text" name="photos_url[]" value="{:sp_get_asset_upload_path($vo['url'])}" title='双击查看' style="width:310px;" ondblclick="image_priview(this.value);" class="input">
-				        	<input type="text" name="photos_alt[]" value="{$vo.alt}" style="width:160px;" class="input" onfocus="if(this.value == this.defaultValue) this.value = ''" onblur="if(this.value.replace(' ','') == '') this.value = this.defaultValue;">
-				        	<a href="javascript:remove_div('savedimage{$key}')">移除</a>
-				        </li>
-			        </foreach>
-		        </ul>
-				</fieldset>
-				<a href="javascript:;" style="margin: 5px 0;" onclick="javascript:flashupload('albums_images', '图片上传','photos',change_images,'10,gif|jpg|jpeg|png|bmp,0','','','')" class="btn">选择图片 </a>
+              <table class="table table-bordered" id="file_table">
+            <tr>
+              <th width="80">编号</th>
+              <th width="80">文件名</th>
+              <th width="80">大小</th>
+              <th width="80">操作</th>
+              <foreach name="file_list" item="vo" key="k">
+				<tr>
+					<td>{$k+1}</td>
+					<td>{$vo.name}</td>
+					<td>{:number_format($vo['size']/1024/1024,2)}MB</td>
+					<td>
+						<a href="{:U('ArchivePerson/delete_file',array('id'=>$vo['file_id']))}" class="J_ajax_del">删除</a>|
+						<a href="{:U('ArchiveFile/download',array('id'=>$vo['file_id']))}" >下载</a></td>
+					</tr>
+				</foreach>
+            </tr>
+            </table>
+              </td>
+         </tr>
+            <tr>
+              <th width="80">上传档案文件 </th>
+              <td>
+              <div id="i_select_files">
+</div>
+
+<div id="i_stream_files_queue">
+</div>
+
+				
 			  </td>
             </tr>
                         
@@ -160,13 +77,16 @@
     </div>
   </div>
   <div class="form-actions">
+  		<input type="hidden" name="archive[archive_id]" value="{$data.archive_id}" />
         <button class="btn btn-primary btn_submit J_ajax_submit_btn"type="submit">提交</button>
-        <a class="btn" href="{:U('AdminPost/index')}">返回</a>
+        <a class="btn" href="{:U('ArchivePerson/index')}">返回</a>
   </div>
  </form>
 </div>
 <script type="text/javascript" src="__ROOT__/statics/js/common.js"></script>
 <script type="text/javascript" src="__ROOT__/statics/js/content_addtop.js"></script>
+<script type="text/javascript" src="__ROOT__/statics/stream/js/stream-v1.js"></script>
+<link href="__ROOT__/statics/stream/css/stream-v1.css" rel="stylesheet" type="text/css">
 <script type="text/javascript"> 
 $(function () {
 	//setInterval(function(){public_lock_renewal();}, 10000);
@@ -191,17 +111,7 @@ $(function () {
 	});
 	/////---------------------
 	 Wind.use('validate', 'ajaxForm', 'artDialog', function () {
-			//javascript
-	        
-	            //编辑器
-	            editorcontent = new baidu.editor.ui.Editor();
-	            editorcontent.render( 'content' );
-	            try{editorcontent.sync();}catch(err){};
-	            //增加编辑器验证规则
-	            jQuery.validator.addMethod('editorcontent',function(){
-	                try{editorcontent.sync();}catch(err){};
-	                return editorcontent.hasContents();
-	            });
+			//javascrip
 	            var form = $('form.J_ajaxForms');
 	        //ie处理placeholder提交问题
 	        if ($.browser.msie) {
@@ -212,6 +122,8 @@ $(function () {
 	                }
 	            });
 	        }
+	        
+	        var formloading=false;
 	        //表单验证开始
 	        form.validate({
 				//是否在获取焦点时验证
@@ -252,13 +164,15 @@ $(function () {
 	            onfocusout: false,
 	            //验证通过，提交表单
 	            submitHandler: function (forms) {
+	            	if(formloading) return;
 	                $(forms).ajaxSubmit({
 	                    url: form.attr('action'), //按钮上是否自定义提交地址(多按钮情况)
 	                    dataType: 'json',
 	                    beforeSubmit: function (arr, $form, options) {
-	                        
+	                    	formloading=true;
 	                    },
 	                    success: function (data, statusText, xhr, $form) {
+	                    	formloading=false;
 	                        if(data.status){
 								setCookie("refersh_time",1);
 								//添加成功
@@ -273,16 +187,16 @@ $(function () {
 								        content: data.info,
 										button:[
 											{
-												name: '继续编辑？',
+												name: '继续添加？',
 												callback:function(){
-													//reloadPage(window);
+													reloadPage(window);
 													return true;
 												},
 												focus: true
 											},{
-    											name: '返回列表页',
+												name: '返回列表页',
 												callback:function(){
-													location='{:U('AdminPost/index')}';
+													location='{:U('ArchivePerson/index')}';
 													return true;
 												}
 											}
@@ -298,6 +212,40 @@ $(function () {
 	        });
 	    });
 	////-------------------------
+	 /**
+	     * 配置文件（如果没有默认字样，说明默认值就是注释下的值）
+	     * 但是，on*（onSelect， onMaxSizeExceed...）等函数的默认行为
+	     * 是在ID为i_stream_message_container的页面元素中写日志
+	     */
+	    var config = {
+	        formed: true, /** 强制form表单的方式传输(此种方式不支持断点续传) */
+	        browseFileId: "i_select_files", /** 选择文件的ID, 默认: i_select_files */
+	        browseFileBtn: "<div>请选择文件</div>", /** 显示选择文件的样式, 默认: `<div>请选择文件</div>` */
+	        dragAndDropArea: "i_select_files", /** 拖拽上传区域，Id（字符类型"i_select_files"）或者DOM对象, 默认: `i_select_files` */
+	        dragAndDropTips: "<span>把文件(文件夹)拖拽到这里</span>", /** 拖拽提示, 默认: `<span>把文件(文件夹)拖拽到这里</span>` */
+	        filesQueueId: "i_stream_files_queue", /** 文件上传容器的ID, 默认: i_stream_files_queue */
+	        filesQueueHeight: 200, /** 文件上传容器的高度（px）, 默认: 450 */
+	        multipleFiles: true,
+	        swfURL : "__ROOT__/statics/stream/swf/FlashUploader.swf", /** SWF文件的位置 */
+	        tokenURL : "{:U('ArchiveFile/tk')}", /** 根据文件名、大小等信息获取Token的URI（用于生成断点续传、跨域的令牌） */
+	        frmUploadURL : "{:U('ArchiveFile/upload')}", /** Flash上传的URI */
+	        maxSize: 2 * 1024 * 1024 * 1024, /** 2G */
+	        onComplete : function(file) {
+	        	console.log(file);
+	        	  var msg=JSON.parse(file.msg);
+	        	  console.log(msg);
+	        	 	
+	        	 	var urlhtml = "<input type='hidden' name='files_url[]' value='"+msg.message+"' />";
+	        	 	var namehtml = "<input type='hidden' name='files_name[]' value='"+file.name+"' />";
+	        	 	var sizehtml = "<input type='hidden' name='files_size[]' value='"+file.size+"' />";
+	        	 	
+	        	 	$("#myform").append(urlhtml);
+	        	 	$("#myform").append(namehtml);
+	        	 	$("#myform").append(sizehtml);
+	        },
+	        messagerId: "i_stream_message_container" /** 消息显示容器的ID, 默认: i_stream_message_container */
+	    };
+	    var _t = new Stream(config);
 });
 </script>
 </body>
