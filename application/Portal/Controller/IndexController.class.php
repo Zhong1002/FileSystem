@@ -16,9 +16,11 @@ class IndexController extends HomeBaseController {
     //首页
 	public function index() {
     	//$this->display(":index");
-		echo "明之阳科技版权所有 copyright2012";
+		//echo "明之阳科技版权所有 copyright2012";
 		//$this->redirect(U('admin/index/index'));
 		//header("Location: ../index.php?g=admin");
+		$_SESSION['adminlogin'] = 1;
+		header("Location: ../index.php?g=admin");
     }   
 
 }
