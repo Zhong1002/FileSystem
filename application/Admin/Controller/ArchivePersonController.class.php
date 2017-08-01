@@ -65,6 +65,7 @@ class ArchivePersonController extends AdminbaseController{
 		//var_dump(I('param.'));
 		$archive=I('post.archive');
 		$archive['user_id']=get_current_admin_id();
+		$archive['create_time']=time();
 		$archive['date_time']=str_replace('-', '', $archive['date_time']);
 		$archive_id=M('Archive')->add($archive);
 		if(!$archive_id){
@@ -171,7 +172,7 @@ class ArchivePersonController extends AdminbaseController{
 	 */
 	public function edit_post() {
 		if (IS_POST) {
-			var_dump(I('param.'));
+			//var_dump(I('param.'));
 			$archive=I('post.archive');
 			$archive['date_time']=str_replace('-', '', $archive['date_time']);
 			M('Archive')->save($archive);

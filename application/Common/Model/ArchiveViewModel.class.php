@@ -20,11 +20,15 @@ class ArchiveViewModel extends ViewModel {
 		),
 		'Users'	=>	array(
 			'user_nicename',
+			'user_tel',
+			'user_email',
+			'office_tel',
 			'_on' => 'Archive.user_id=Users.id',
 		    '_type' => 'LEFT'
 		),
 		'ArchiveType'=>array(
 			'name'=>'type_name',
+			'type_sn',
 			'_on' => 'ArchiveType.id=Archive.type_id'
 		)
 	);

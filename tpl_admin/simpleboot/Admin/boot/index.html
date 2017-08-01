@@ -167,9 +167,9 @@ right: initial !important;}
 							<i class="fa fa-caret-down"></i>
 						</a>
 						<ul class="user-menu pull-right dropdown-menu dropdown-yellow dropdown-caret dropdown-closer">
-							<if condition="sp_auth_check(sp_get_current_admin_id(),'admin/setting/site')">
+							<!-- <if condition="sp_auth_check(sp_get_current_admin_id(),'admin/setting/site')">
 								<li><a href="javascript:openapp('{:U('setting/site')}','index_site','站点管理');"><i class="fa fa-cog"></i> 站点管理</a></li>
-							</if>
+							</if> -->
 							<if condition="sp_auth_check(sp_get_current_admin_id(),'admin/user/userinfo')">
 								<li><a href="javascript:openapp('{:U('user/userinfo')}','index_userinfo','个人资料');"><i class="fa fa-user"></i> 个人资料</a></li>
 							</if>

@@ -342,9 +342,6 @@ class Model {
         if(in_array('update_time', $this->fields)){
             $data['update_time']=time();
         }
-        if(in_array('create_time', $this->fields)){
-        	$data['create_time']=time();
-        }
     }
     // 插入成功后的回调方法
     protected function _after_insert($data,$options) {}
