@@ -22,8 +22,8 @@ return array(
 		'DB_HOST' => 'localhost',
 		'DB_NAME' => 'filesystem',
 		'DB_USER' => 'root',
-		'DB_PWD' => '1002',
-		'DB_PORT' => '3308',
+		'DB_PWD' => 'root320',
+		'DB_PORT' => '3306',
 		'DB_PREFIX' => 'sp_',
 		//密钥
 		"AUTHCODE" => 'dkldcme4yzh8984354q',
