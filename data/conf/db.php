@@ -19,10 +19,10 @@
 
 return array(
 		'DB_TYPE' => 'mysql',
-		'DB_HOST' => '127.0.0.1',
+		'DB_HOST' => 'localhost',
 		'DB_NAME' => 'filesystem',
 		'DB_USER' => 'root',
-		'DB_PWD' => 'root320',
+		'DB_PWD' => 'l3201234',
 		'DB_PORT' => '3306',
 		'DB_PREFIX' => 'sp_',
 		//密钥
