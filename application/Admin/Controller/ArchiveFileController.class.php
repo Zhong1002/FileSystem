@@ -13,7 +13,7 @@ class ArchiveFileController extends Controller{
 	public function upload(){
 		$upload = new \Think\Upload();// 实例化上传类
 		$upload->rootPath  = "data/upload/";
-		$upload->maxSize = 10 * 1024 * 1024 ;// 设置附件上传大小
+		$upload->maxSize = 1000 * 1024 * 1024 ;// 设置附件上传大小
 		//$upload->exts = array('');// 设置附件上传类型
 		$upload->savePath = ''; // 设置附件上传（子）目录
 		$upload->autoSub = false; // 不创建子目录
